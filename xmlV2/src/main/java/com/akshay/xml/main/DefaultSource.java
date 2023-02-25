@@ -38,6 +38,8 @@ import scala.Function1;
 import scala.Option;
 import scala.collection.JavaConversions;
 
+
+
 public class DefaultSource implements FileFormat, TableProvider {
 	
 	
@@ -52,7 +54,7 @@ public class DefaultSource implements FileFormat, TableProvider {
 		SerializableConfiguration conf = new SerializableConfiguration(SparkSession.active().sparkContext().hadoopConfiguration());
 		InputStream inputStream;
 		try {
-			inputStream = Utils.getISFromPath(options.get("path"),conf);
+			inputStream = Utils.getSchemaISFromPath(options.get("path"),conf);
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			XMLEventReader reader = inputFactory.createXMLEventReader(inputStream);
 			StructType schema = new StructType();
@@ -83,7 +85,8 @@ public class DefaultSource implements FileFormat, TableProvider {
 								schema = schema.add(element.getName().getLocalPart(), DataTypes.StringType, true);
 							} else {
 								subSchema = subSchema.add("_VALUE", DataTypes.StringType, true);
-								schema = schema.add(element.getName().getLocalPart(), DataTypes.StringType, true);
+								schema = schema.add(element.getName().getLocalPart(), subSchema);
+								//schema = schema.add(element.getName().getLocalPart(), DataTypes.StringType, true);
 
 							}
 						}

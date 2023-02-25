@@ -28,11 +28,12 @@ import com.akshay.xml.utilities.Utils;
 import com.akshay.xml.utilities.ValueConverters;
 
 import scala.collection.JavaConversions;
+import scala.collection.JavaConverters;
 
 @SuppressWarnings("rawtypes")
 public class XMLPartitionReader implements PartitionReader<InternalRow> {
 
-	//private final String fileName;
+	// private final String fileName;
 	private XMLEventReader reader;
 	private List<Function> valueConverters;
 	private String rowTag;
@@ -43,7 +44,7 @@ public class XMLPartitionReader implements PartitionReader<InternalRow> {
 
 	public XMLPartitionReader(XMLInputPartition xmlInputPartition, StructType schema, String fileName, String rowTag,
 			String rootTag, SerializableConfiguration conf) throws XMLStreamException, IOException {
-		//this.fileName = fileName;
+		// this.fileName = fileName;
 		this.valueConverters = ValueConverters.getConverters(schema);
 		this.rowTag = rowTag;
 		this.schema = getSchemaMap(schema);
@@ -63,7 +64,7 @@ public class XMLPartitionReader implements PartitionReader<InternalRow> {
 	public void createXMLReader() throws XMLStreamException, IOException {
 		XMLInputFactory inputFactory = XMLInputFactory.newFactory();
 		inputFactory.setProperty(XMLInputFactory.IS_COALESCING, true);
-		InputStream stream = Utils.getISFromPath(this.xmlInputPartition .getPath(), conf);
+		InputStream stream = Utils.getISFromPath(this.xmlInputPartition.getPath(), conf);
 		reader = inputFactory.createXMLEventReader(stream);
 		reader.nextEvent();
 	}
@@ -92,7 +93,6 @@ public class XMLPartitionReader implements PartitionReader<InternalRow> {
 		StartElement element = event.asStartElement();
 		event = reader.nextEvent();
 		int cnt = 0;
-		Map<String, Map<String, String>> mainMap = new HashMap<>();
 		if (event.isCharacters() && this.schema.get(element.getName().getLocalPart()) != null) {
 			String elementOne = event.asCharacters().getData();
 			if (elementOne.replaceAll("\n", "").trim().equals("")) {
@@ -101,19 +101,18 @@ public class XMLPartitionReader implements PartitionReader<InternalRow> {
 
 			Iterator<Attribute> i = element.getAttributes();
 
-			Map<String, String> valueMap = new HashMap<>();
+			List<Object> ll = new ArrayList<>();
 			while (i.hasNext()) {
 				Attribute attribute = i.next();
-				valueMap.put("_" + attribute.getName().getLocalPart(), attribute.getValue());
+				ll.add(ValueConverters.getTypesFromValue(attribute.getValue().toString()));
 				cnt += 1;
 			}
 			if (cnt == 0) {
 				convertedValues.add(valueConverters.get(loopValue).apply(elementOne));
 			} else {
-				valueMap.put("_VALUE", elementOne);
-				mainMap.put(element.getName().getLocalPart(), valueMap);
-				convertedValues.add(valueConverters.get(loopValue).apply(mainMap.toString()));
-
+				ll.add(ValueConverters.getTypesFromValue(elementOne.toString()));
+				InternalRow inner = InternalRow.apply(JavaConverters.asScalaBuffer(ll).toList());
+				convertedValues.add(valueConverters.get(loopValue).apply(inner));
 			}
 
 			return convertedValues;

@@ -4,7 +4,11 @@
 //import java.io.FileNotFoundException;
 //import java.io.IOException;
 //import java.io.InputStream;
+//import java.util.ArrayList;
+//import java.util.HashMap;
 //import java.util.Iterator;
+//import java.util.List;
+//import java.util.Map;
 //
 //import javax.xml.stream.XMLEventReader;
 //import javax.xml.stream.XMLInputFactory;
@@ -15,11 +19,13 @@
 //import javax.xml.stream.events.XMLEvent;
 //
 //import org.apache.commons.collections.IteratorUtils;
+//import org.apache.spark.sql.catalyst.InternalRow;
 //import org.apache.spark.sql.types.DataTypes;
 //import org.apache.spark.sql.types.StructType;
 //
 //import com.akshay.xml.streaming.StreamingXMLReader;
 //import com.akshay.xml.utilities.Utils;
+//import com.akshay.xml.utilities.ValueConverters;
 //
 //import scala.collection.JavaConverters;
 //
@@ -89,14 +95,22 @@
 //	}
 //
 //	public static void main(String[] args) throws FileNotFoundException, XMLStreamException, IOException {
-//		StreamingXMLReader reader = new StreamingXMLReader(inferSchema(),
-//				Utils.getISFromPath("/Users/akshay.sharma/Downloads/noteBookRepo/AzureDevOps-DBRepo/test.xml"),
-//				"person", "people");
-//		System.err.println(IteratorUtils.toList(JavaConverters.asJavaIterator(reader.get())));
-//		StreamingXMLReader reader2 = new StreamingXMLReader(inferSchema(),
-//				Utils.getISFromPath("/Users/akshay.sharma/Downloads/noteBookRepo/AzureDevOps-DBRepo/test.xml"),
-//				"person", "people");
-//		System.err.println(IteratorUtils.toList(JavaConverters.asJavaIterator(reader2.get())));
+//		ValueConverters.getTypesFromValue("Hello");
+//		Map<Object,Object> t = new HashMap<>();
+//		t.put("a","1");
+//		t.put("b","2");
+//		JavaConverters.mapAsScalaMap(t).toSeq();
+//		System.err.println(JavaConverters.mapAsScalaMap(t));
+//		//InternalRow r = InternalRow.fromSeq(JavaConverters.mapAsScalaMap(t).toSeq());
+//		//System.err.println(r);
+////		StreamingXMLReader reader = new StreamingXMLReader(inferSchema(),
+////				Utils.getISFromPath("/Users/akshay.sharma/Downloads/noteBookRepo/AzureDevOps-DBRepo/test.xml"),
+////				"person", "people");
+////		System.err.println(IteratorUtils.toList(JavaConverters.asJavaIterator(reader.get())));
+////		StreamingXMLReader reader2 = new StreamingXMLReader(inferSchema(),
+////				Utils.getISFromPath("/Users/akshay.sharma/Downloads/noteBookRepo/AzureDevOps-DBRepo/test.xml"),
+////				"person", "people");
+////		System.err.println(IteratorUtils.toList(JavaConverters.asJavaIterator(reader2.get())));
 //	}
 //
 //}

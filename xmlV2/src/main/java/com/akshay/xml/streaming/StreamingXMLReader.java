@@ -73,7 +73,6 @@ public class StreamingXMLReader implements Serializable {
 		StartElement element = event.asStartElement();
 		event = reader.nextEvent();
 		int cnt = 0;
-		Map<String, Map<String, String>> mainMap = new HashMap<>();
 		if (event.isCharacters() && this.schema.get(element.getName().getLocalPart()) != null) {
 			String elementOne = event.asCharacters().getData();
 			if (elementOne.replaceAll("\n", "").trim().equals("")) {
@@ -82,19 +81,18 @@ public class StreamingXMLReader implements Serializable {
 
 			Iterator<Attribute> i = element.getAttributes();
 
-			Map<String, String> valueMap = new HashMap<>();
+			List<Object> ll = new ArrayList<>();
 			while (i.hasNext()) {
 				Attribute attribute = i.next();
-				valueMap.put("_" + attribute.getName().getLocalPart(), attribute.getValue());
+				ll.add(ValueConverters.getTypesFromValue(attribute.getValue().toString()));
 				cnt += 1;
 			}
 			if (cnt == 0) {
 				convertedValues.add(valueConverters.get(loopValue).apply(elementOne));
 			} else {
-				valueMap.put("_VALUE", elementOne);
-				mainMap.put(element.getName().getLocalPart(), valueMap);
-				convertedValues.add(valueConverters.get(loopValue).apply(mainMap.toString()));
-
+				ll.add(ValueConverters.getTypesFromValue(elementOne.toString()));
+				InternalRow inner = InternalRow.apply(JavaConverters.asScalaBuffer(ll).toList());
+				convertedValues.add(valueConverters.get(loopValue).apply(inner));
 			}
 
 			return convertedValues;
